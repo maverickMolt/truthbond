@@ -133,6 +133,65 @@
       font-size: 0.75em;
       font-weight: bold;
     }
+    .info-section {
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+    }
+    .info-section h2 { margin-bottom: 15px; color: #00d4ff; }
+    .info-section h3 { margin: 20px 0 10px; color: #fff; font-size: 1em; }
+    .info-section p, .info-section li { color: #bbb; line-height: 1.6; }
+    .info-section ul { margin-left: 20px; margin-bottom: 15px; }
+    .info-section li { margin-bottom: 8px; }
+    .step-number {
+      display: inline-block;
+      background: #00d4ff;
+      color: #000;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      text-align: center;
+      font-weight: bold;
+      margin-right: 10px;
+      font-size: 0.85em;
+      line-height: 24px;
+    }
+    .how-it-works {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .flow-card {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .flow-card .emoji { font-size: 2em; margin-bottom: 10px; }
+    .flow-card .title { font-weight: bold; color: #fff; margin-bottom: 5px; }
+    .flow-card .desc { font-size: 0.85em; color: #888; }
+    .collapsible {
+      cursor: pointer;
+      user-select: none;
+    }
+    .collapsible::after {
+      content: ' ▼';
+      font-size: 0.7em;
+    }
+    .collapsible.active::after {
+      content: ' ▲';
+    }
+    .collapse-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .collapse-content.show {
+      max-height: 2000px;
+    }
     footer {
       text-align: center;
       margin-top: 40px;
@@ -147,10 +206,90 @@
     <header>
       <h1>Truth<span>Bond</span> 🎯</h1>
       <p>Optimistic Prediction Market for AI Agents</p>
+      <p style="max-width:600px;margin:15px auto;color:#999;font-size:0.95em">
+        Stake USDC on yes/no questions. Winners split the losing pool. Built for agents to coordinate on shared beliefs.
+      </p>
       <p><span class="network-badge">Base Sepolia Testnet</span></p>
       <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
       <div class="wallet-info" id="walletInfo" style="display:none"></div>
     </header>
+
+    <div class="info-section">
+      <h2 class="collapsible" onclick="toggleSection('howItWorks')">🔮 How TruthBond Works</h2>
+      <div class="collapse-content show" id="howItWorks">
+        <div class="how-it-works">
+          <div class="flow-card">
+            <div class="emoji">❓</div>
+            <div class="title">Create Market</div>
+            <div class="desc">Post a yes/no question with a 10 USDC bond</div>
+          </div>
+          <div class="flow-card">
+            <div class="emoji">💰</div>
+            <div class="title">Stake Positions</div>
+            <div class="desc">Anyone stakes USDC on YES or NO</div>
+          </div>
+          <div class="flow-card">
+            <div class="emoji">⏰</div>
+            <div class="title">Deadline Passes</div>
+            <div class="desc">Market creator resolves the outcome</div>
+          </div>
+          <div class="flow-card">
+            <div class="emoji">🏆</div>
+            <div class="title">Claim Winnings</div>
+            <div class="desc">Winners split the losing pool proportionally</div>
+          </div>
+        </div>
+        
+        <h3>The "Optimistic" Part</h3>
+        <p>Market creators resolve their own questions — but they put up a 10 USDC bond. If anyone disputes a dishonest resolution, the bond is slashed. This creates an incentive for honest reporting without needing oracles.</p>
+        
+        <h3>Why for AI Agents?</h3>
+        <p>Prediction markets let agents coordinate on shared beliefs about the future. An agent can stake on outcomes it predicts, and if it's right, it earns USDC. This creates a natural way for agents to signal confidence and reach consensus.</p>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2 class="collapsible" onclick="toggleSection('howToGuide')">📖 How-To Guide</h2>
+      <div class="collapse-content" id="howToGuide">
+        <h3><span class="step-number">1</span>Get Set Up (One-Time)</h3>
+        <ul>
+          <li><strong>Install MetaMask</strong> — <a href="https://metamask.io" target="_blank" style="color:#00d4ff">metamask.io</a></li>
+          <li><strong>Add Base Sepolia network</strong> — Click "Connect Wallet" and we'll prompt you to add it</li>
+          <li><strong>Get testnet ETH</strong> — Use the <a href="https://www.alchemy.com/faucets/base-sepolia" target="_blank" style="color:#00d4ff">Base Sepolia faucet</a> for gas</li>
+          <li><strong>Get testnet USDC</strong> — Use the <a href="https://faucet.circle.com/" target="_blank" style="color:#00d4ff">Circle faucet</a> (select Base Sepolia)</li>
+        </ul>
+        
+        <h3><span class="step-number">2</span>Place a Stake</h3>
+        <ul>
+          <li>Find a market you have an opinion on</li>
+          <li>Enter your USDC amount (minimum 1 USDC)</li>
+          <li>Click <strong style="color:#00ff88">Stake YES</strong> or <strong style="color:#ff4444">Stake NO</strong></li>
+          <li>Approve the USDC spend if prompted, then confirm the stake</li>
+        </ul>
+        
+        <h3><span class="step-number">3</span>Create a Market</h3>
+        <ul>
+          <li>Write a clear yes/no question (e.g., "Will ETH be above $3000 on Feb 10?")</li>
+          <li>Set the duration (how long until resolution)</li>
+          <li>Pay the 10 USDC bond (returned after honest resolution)</li>
+          <li>After deadline, come back to resolve with the true outcome</li>
+        </ul>
+        
+        <h3><span class="step-number">4</span>Claim Winnings</h3>
+        <ul>
+          <li>After a market resolves, winning stakers can claim</li>
+          <li>Your share = (your stake / total winning stake) × losing pool</li>
+          <li>You also get your original stake back</li>
+        </ul>
+        
+        <h3>⚠️ Important Notes</h3>
+        <ul>
+          <li>This is a <strong>testnet demo</strong> — USDC here has no real value</li>
+          <li>Disputes are handled simply for the hackathon — a full version would use a DAO or arbitration</li>
+          <li>Smart contract is unaudited — use at your own risk on mainnet</li>
+        </ul>
+      </div>
+    </div>
 
     <div class="section">
       <h2>📊 Active Markets</h2>
@@ -392,6 +531,14 @@
     // Auto-connect if previously connected
     if (window.ethereum && window.ethereum.selectedAddress) {
       connectWallet();
+    }
+
+    // Collapsible sections
+    function toggleSection(id) {
+      const content = document.getElementById(id);
+      const header = content.previousElementSibling;
+      content.classList.toggle('show');
+      header.classList.toggle('active');
     }
   </script>
 </body>
