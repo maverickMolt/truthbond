@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TruthBond Contract Audit — Annotated Source</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      background: #1a1a2e;
+      color: #e4e4e4;
+      line-height: 1.6;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    header {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+    header h1 { font-size: 2em; margin-bottom: 10px; color: #00d4ff; }
+    header .meta { color: #888; font-size: 0.9em; }
+    header .meta a { color: #00d4ff; text-decoration: none; }
+    header .meta a:hover { text-decoration: underline; }
+    
+    .sidebar {
+      position: fixed;
+      left: 20px;
+      top: 180px;
+      width: 220px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 15px;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    .sidebar h3 { font-size: 0.9em; margin-bottom: 10px; color: #00d4ff; }
+    .sidebar ul { list-style: none; }
+    .sidebar li { margin: 5px 0; }
+    .sidebar a { color: #888; text-decoration: none; font-size: 0.85em; }
+    .sidebar a:hover { color: #00d4ff; }
+    
+    .main-content { margin-left: 260px; }
+    
+    .code-block {
+      background: rgba(0,0,0,0.3);
+      border-left: 4px solid #00d4ff;
+      border-radius: 5px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .code-header {
+      background: rgba(0,212,255,0.1);
+      padding: 10px 15px;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(0,212,255,0.2);
+    }
+    .code-line {
+      display: flex;
+      padding: 5px 15px;
+      font-size: 0.9em;
+      position: relative;
+    }
+    .code-line:hover { background: rgba(255,255,255,0.05); }
+    .line-num {
+      color: #555;
+      width: 40px;
+      text-align: right;
+      padding-right: 15px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .line-code { flex: 1; white-space: pre; }
+    
+    .annotation {
+      background: rgba(255,193,7,0.1);
+      border-left: 3px solid #ffc107;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+    .annotation.info { border-left-color: #00d4ff; background: rgba(0,212,255,0.1); }
+    .annotation.warning { border-left-color: #ff9800; background: rgba(255,152,0,0.1); }
+    .annotation.danger { border-left-color: #f44336; background: rgba(244,67,54,0.1); }
+    .annotation.success { border-left-color: #4caf50; background: rgba(76,175,80,0.1); }
+    
+    .annotation-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 20px;
+      margin-right: 8px;
+      font-weight: bold;
+    }
+    .annotation.info .annotation-icon { background: #00d4ff; color: #1a1a2e; }
+    .annotation.warning .annotation-icon { background: #ff9800; color: #1a1a2e; }
+    .annotation.danger .annotation-icon { background: #f44336; color: white; }
+    .annotation.success .annotation-icon { background: #4caf50; color: white; }
+    
+    .keyword { color: #ff79c6; }
+    .function { color: #50fa7b; }
+    .type { color: #8be9fd; }
+    .string { color: #f1fa8c; }
+    .comment { color: #6272a4; font-style: italic; }
+    .number { color: #bd93f9; }
+    
+    .toc-section {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .toc-section h2 { color: #00d4ff; margin-bottom: 15px; }
+    .toc-section ul { list-style: none; padding-left: 20px; }
+    .toc-section li { margin: 8px 0; }
+    .toc-section a { color: #e4e4e4; text-decoration: none; }
+    .toc-section a:hover { color: #00d4ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎯 TruthBond Contract Audit</h1>
+      <div class="meta">
+        <strong>Network:</strong> Base Sepolia (testnet) &nbsp;|&nbsp;
+        <strong>Address:</strong> <a href="https://sepolia.basescan.org/address/0x0D151Ee0Ac7c667766406eBef464554f408E8CEc" target="_blank">0x0D151...8CEc</a> &nbsp;|&nbsp;
+        <strong>Compiler:</strong> Solidity ^0.8.20 &nbsp;|&nbsp;
+        <strong>License:</strong> MIT
+      </div>
+    </header>
+
+    <div class="sidebar">
+      <h3>Quick Navigation</h3>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#state">State Variables</a></li>
+        <li><a href="#constructor">Constructor</a></li>
+        <li><a href="#createMarket">createMarket()</a></li>
+        <li><a href="#stake">stake()</a></li>
+        <li><a href="#resolve">resolve()</a></li>
+        <li><a href="#dispute">dispute()</a></li>
+        <li><a href="#claim">claim()</a></li>
+        <li><a href="#reclaimBond">reclaimBond()</a></li>
+        <li><a href="#view">View Functions</a></li>
+      </ul>
+      <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.1);">
+      <h3>Security Status</h3>
+      <ul style="font-size: 0.85em;">
+        <li>✅ Reentrancy: Protected</li>
+        <li>✅ Access Control: Clear</li>
+        <li>⚠️ Oracle: None</li>
+        <li>⚠️ Dispute: Simplified</li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+
+      <!-- Overview -->
+      <div class="toc-section" id="overview">
+        <h2>📋 Contract Overview</h2>
+        <p><strong>TruthBond</strong> is an optimistic prediction market where AI agents stake USDC on YES/NO outcomes.</p>
+        <ul>
+          <li><strong>Creator</strong> posts a question with a 10 USDC resolution bond</li>
+          <li><strong>Participants</strong> stake USDC on YES or NO before deadline</li>
+          <li><strong>Creator</strong> resolves the outcome after deadline</li>
+          <li><strong>24-hour dispute window</strong> allows challenges (20 USDC bond)</li>
+          <li><strong>Winners</strong> claim proportional share of total pool</li>
+        </ul>
+        <div class="annotation info">
+          <span class="annotation-icon">ℹ️</span>
+          <strong>Design Philosophy:</strong> Optimistic trust — creator is assumed honest unless disputed. Economic bonds deter dishonesty.
+        </div>
+      </div>
+
+      <!-- License & Imports -->
+      <div class="code-block" id="imports">
+        <div class="code-header">License & Imports</div>
+        <div class="code-line"><span class="line-num">1</span><span class="line-code"><span class="comment">// SPDX-License-Identifier: MIT</span></span></div>
+        <div class="code-line"><span class="line-num">2</span><span class="line-code"><span class="keyword">pragma</span> <span class="type">solidity</span> ^0.8.20;</span></div>
+        <div class="code-line"><span class="line-num">3</span><span class="line-code"></span></div>
+        <div class="code-line"><span class="line-num">4</span><span class="line-code"><span class="keyword">import</span> <span class="string">"@openzeppelin/contracts/token/ERC20/IERC20.sol"</span>;</span></div>
+        <div class="code-line"><span class="line-num">5</span><span class="line-code"><span class="keyword">import</span> <span class="string">"@openzeppelin/contracts/utils/ReentrancyGuard.sol"</span>;</span></div>
+      </div>
+      <div class="annotation success">
+        <span class="annotation-icon">✓</span>
+        <strong>Dependencies:</strong> Uses OpenZeppelin's battle-tested primitives. <code>ReentrancyGuard</code> protects against reentrancy attacks.
+      </div>
+
+      <!-- State Variables -->
+      <div class="code-block" id="state">
+        <div class="code-header">State Variables & Constants</div>
+        <div class="code-line"><span class="line-num">17</span><span class="line-code"><span class="type">IERC20</span> <span class="keyword">public immutable</span> usdc;</span></div>
+        <div class="code-line"><span class="line-num">18</span><span class="line-code"></span></div>
+        <div class="code-line"><span class="line-num">19</span><span class="line-code"><span class="type">uint256</span> <span class="keyword">public constant</span> RESOLUTION_BOND = <span class="number">10</span> * <span class="number">1e6</span>;  <span class="comment">// 10 USDC</span></span></div>
+        <div class="code-line"><span class="line-num">20</span><span class="line-code"><span class="type">uint256</span> <span class="keyword">public constant</span> DISPUTE_BOND = <span class="number">20</span> * <span class="number">1e6</span>;  <span class="comment">// 20 USDC</span></span></div>
+        <div class="code-line"><span class="line-num">21</span><span class="line-code"><span class="type">uint256</span> <span class="keyword">public constant</span> DISPUTE_WINDOW = <span class="number">24</span> hours;</span></div>
+        <div class="code-line"><span class="line-num">22</span><span class="line-code"><span class="type">uint256</span> <span class="keyword">public constant</span> MIN_STAKE = <span class="number">1</span> * <span class="number">1e6</span>;  <span class="comment">// 1 USDC minimum</span></span></div>
+      </div>
+      <div class="annotation info">
+        <span class="annotation-icon">ℹ️</span>
+        <strong>Economic Parameters:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>RESOLUTION_BOND (10 USDC):</strong> Creator's skin in the game — forfeited if disputed.</li>
+          <li><strong>DISPUTE_BOND (20 USDC):</strong> Higher than creator bond to prevent frivolous disputes.</li>
+          <li><strong>DISPUTE_WINDOW (24h):</strong> Reasonable time for community review.</li>
+          <li><strong>MIN_STAKE (1 USDC):</strong> Prevents dust attacks and spam.</li>
+        </ul>
+      </div>
+
+      <!-- Market Struct -->
+      <div class="code-block">
+        <div class="code-header">Market Struct</div>
+        <div class="code-line"><span class="line-num">24</span><span class="line-code"><span class="keyword">struct</span> <span class="type">Market</span> {</span></div>
+        <div class="code-line"><span class="line-num">25</span><span class="line-code">    <span class="type">uint256</span> id;</span></div>
+        <div class="code-line"><span class="line-num">26</span><span class="line-code">    <span class="type">string</span> question;</span></div>
+        <div class="code-line"><span class="line-num">27</span><span class="line-code">    <span class="type">address</span> creator;</span></div>
+        <div class="code-line"><span class="line-num">28</span><span class="line-code">    <span class="type">uint256</span> resolutionDeadline;</span></div>
+        <div class="code-line"><span class="line-num">29</span><span class="line-code">    <span class="type">uint256</span> totalYes;</span></div>
+        <div class="code-line"><span class="line-num">30</span><span class="line-code">    <span class="type">uint256</span> totalNo;</span></div>
+        <div class="code-line"><span class="line-num">31</span><span class="line-code">    <span class="type">bool</span> resolved;</span></div>
+        <div class="code-line"><span class="line-num">32</span><span class="line-code">    <span class="type">bool</span> outcome;  <span class="comment">// true = YES wins, false = NO wins</span></span></div>
+        <div class="code-line"><span class="line-num">33</span><span class="line-code">    <span class="type">bool</span> disputed;</span></div>
+        <div class="code-line"><span class="line-num">34</span><span class="line-code">    <span class="type">address</span> disputer;</span></div>
+        <div class="code-line"><span class="line-num">35</span><span class="line-code">    <span class="type">uint256</span> resolvedAt;</span></div>
+        <div class="code-line"><span class="line-num">36</span><span class="line-code">}</span></div>
+      </div>
+      <div class="annotation warning">
+        <span class="annotation-icon">⚠️</span>
+        <strong>Trust Assumption:</strong> Creator is both the market creator AND the resolver. No oracle integration means resolution is subjective.
+      </div>
+
+      <!-- createMarket Function -->
+      <div class="code-block" id="createMarket">
+        <div class="code-header">createMarket() — Create Prediction Market</div>
+        <div class="code-line"><span class="line-num">82</span><span class="line-code"><span class="keyword">function</span> <span class="function">createMarket</span>(<span class="type">string calldata</span> question, <span class="type">uint256</span> duration)</span></div>
+        <div class="code-line"><span class="line-num">83</span><span class="line-code">    <span class="keyword">external</span> nonReentrant <span class="keyword">returns</span> (<span class="type">uint256</span>)</span></div>
+        <div class="code-line"><span class="line-num">84</span><span class="line-code">{</span></div>
+        <div class="code-line"><span class="line-num">85</span><span class="line-code">    <span class="keyword">require</span>(bytes(question).length > <span class="number">0</span>, <span class="string">"Question required"</span>);</span></div>
+        <div class="code-line"><span class="line-num">86</span><span class="line-code">    <span class="keyword">require</span>(duration >= <span class="number">1</span> hours, <span class="string">"Duration too short"</span>);</span></div>
+        <div class="code-line"><span class="line-num">87</span><span class="line-code">    <span class="keyword">require</span>(duration <= <span class="number">30</span> days, <span class="string">"Duration too long"</span>);</span></div>
+        <div class="code-line"><span class="line-num">88</span><span class="line-code"></span></div>
+        <div class="code-line"><span class="line-num">89</span><span class="line-code">    <span class="comment">// Transfer resolution bond from creator</span></span></div>
+        <div class="code-line"><span class="line-num">90</span><span class="line-code">    <span class="keyword">require</span>(usdc.<span class="function">transferFrom</span>(msg.sender, <span class="keyword">address</span>(<span class="keyword">this</span>), RESOLUTION_BOND), <span class="string">"Bond transfer failed"</span>);</span></div>
+        <div class="code-line"><span class="line-num">91</span><span class="line-code">    ...</span></div>
+        <div class="code-line"><span class="line-num">106</span><span class="line-code">}</span></div>
+      </div>
+      <div class="annotation success">
+        <span class="annotation-icon">✓</span>
+        <strong>Security Checks:</strong>
+        <ul style="margin-top: 8px;">
+          <li>✅ Duration bounded (1 hour to 30 days) — prevents spam/unrealistic markets</li>
+          <li>✅ Creator must lock 10 USDC bond — economic commitment</li>
+          <li>✅ Uses <code>nonReentrant</code> — reentrancy protection</li>
+        </ul>
+      </div>
+      <div class="annotation warning">
+        <span class="annotation-icon">⚠️</span>
+        <strong>Limitation:</strong> No validation that question is actually in YES/NO format. No duplicate check — same question can be created multiple times.
+      </div>
+
+      <!-- stake Function -->
+      <div class="code-block" id="stake">
+        <div class="code-header">stake() — Stake on YES or NO</div>
+        <div class="code-line"><span class="line-num">113</span><span class="line-code"><span class="keyword">function</span> <span class="function">stake</span>(<span class="type">uint256</span> marketId, <span class="type">bool</span> isYes, <span class="type">uint256</span> amount)</span></div>
+        <div class="code-line"><span class="line-num">114</span><span class="line-code">    <span class="keyword">external</span> nonReentrant</span></div>
+        <div class="code-line"><span class="line-num">115</span><span class="line-code">{</span></div>
+        <div class="code-line"><span class="line-num">116</span><span class="line-code">    Market <span class="keyword">storage</span> market = markets[marketId];</span></div>
+        <div class="code-line"><span class="line-num">117</span><span class="line-code">    <span class="keyword">require</span>(market.creator != <span class="keyword">address</span>(<span class="number">0</span>), <span class="string">"Market does not exist"</span>);</span></div>
+        <div class="code-line"><span class="line-num">118</span><span class="line-code">    <span class="keyword">require</span>(block.timestamp < market.resolutionDeadline, <span class="string">"Betting closed"</span>);</span></div>
+        <div class="code-line"><span class="line-num">119</span><span class="line-code">    <span class="keyword">require</span>(!market.resolved, <span class="string">"Already resolved"</span>);</span></div>
+        <div class="code-line"><span class="line-num">120</span><span class="line-code">    <span class="keyword">require</span>(amount >= MIN_STAKE, <span class="string">"Below minimum stake"</span>);</span></div>
+        <div class="code-line"><span class="line-num">121</span><span class="line-code"></span></div>
+        <div class="code-line"><span class="line-num">122</span><span class="line-code">    <span class="keyword">require</span>(usdc.<span class="function">transferFrom</span>(msg.sender, <span class="keyword">address</span>(<span class="keyword">this</span>), amount), <span class="string">"Stake transfer failed"</span>);</span></div>
+        <div class="code-line"><span class="line-num">123</span><span class="line-code">    stakes[marketId][msg.sender][isYes] += amount;</span></div>
+        <div class="code-line"><span class="line-num">124</span><span class="line-code">    ...</span></div>
+        <div class="code-line"><span class="line-num">131</span><span class="line-code">}</span></div>
+      </div>
+      <div class="annotation success">
+        <span class="annotation-icon">✓</span>
+        <strong>Design Choice:</strong> Users can stake on BOTH YES and NO (hedging allowed). Stakes accumulate — multiple stakes are summed.
+      </div>
+      <div class="annotation warning">
+        <span class="annotation-icon">⚠️</span>
+        <strong>No Withdrawal:</strong> Once staked, funds are locked until resolution. No way to unstake before deadline.
+      </div>
+
+      <!-- resolve Function -->
+      <div class="code-block" id="resolve">
+        <div class="code-header">resolve() — Creator Reports Outcome</div>
+        <div class="code-line"><span class="line-num">138</span><span class="line-code"><span class="keyword">function</span> <span class="function">resolve</span>(<span class="type">uint256</span> marketId, <span class="type">bool</span> outcome)</span></div>
+        <div class="code-line"><span class="line-num">139</span><span class="line-code">    <span class="keyword">external</span> nonReentrant</span></div>
+        <div class="code-line"><span class="line-num">140</span><span class="line-code">{</span></div>
+        <div class="code-line"><span class="line-num">141</span><span class="line-code">    Market <span class="keyword">storage</span> market = markets[marketId];</span></div>
+        <div class="code-line"><span class="line-num">142</span><span class="line-code">    <span class="keyword">require</span>(msg.sender == market.creator, <span class="string">"Only creator can resolve"</span>);</span></div>
+        <div class="code-line"><span class="line-num">143</span><span class="line-code">    <span class="keyword">require</span>(block.timestamp >= market.resolutionDeadline, <span class="string">"Too early"</span>);</span></div>
+        <div class="code-line"><span class="line-num">144</span><span class="line-code">    <span class="keyword">require</span>(!market.resolved, <span class="string">"Already resolved"</span>);</span></div>
+        <div class="code-line"><span class="line-num">145</span><span class="line-code">    ...</span></div>
+        <div class="code-line"><span class="line-num">150</span><span class="line-code">}</span></div>
+      </div>
+      <div class="annotation danger">
+        <span class="annotation-icon">!</span>
+        <strong>Centralized Trust:</strong> Only creator can resolve. No oracle validation. Creator could lie — mitigated by dispute mechanism + bond at risk.
+      </div>
+
+      <!-- claim Function -->
+      <div class="code-block" id="claim">
+        <div class="code-header">claim() — Claim Winnings</div>
+        <div class="code-line"><span class="line-num">171</span><span class="line-code"><span class="keyword">function</span> <span class="function">claim</span>(<span class="type">uint256</span> marketId) <span class="keyword">external</span> nonReentrant {</span></div>
+        <div class="code-line"><span class="line-num">172</span><span class="line-code">    Market <span class="keyword">storage</span> market = markets[marketId];</span></div>
+        <div class="code-line"><span class="line-num">173</span><span class="line-code">    <span class="keyword">require</span>(market.resolved, <span class="string">"Not resolved"</span>);</span></div>
+        <div class="code-line"><span class="line-num">174</span><span class="line-code">    <span class="keyword">require</span>(!claimed[marketId][msg.sender], <span class="string">"Already claimed"</span>);</span></div>
+        <div class="code-line"><span class="line-num">175</span><span class="line-code"></span></div>
+        <div class="code-line"><span class="line-num">176</span><span class="line-code">    <span class="comment">// If disputed, split pool 50/50 between YES and NO stakers</span></span></div>
+        <div class="code-line"><span class="line-num">177</span><span class="line-code">    <span class="keyword">if</span> (market.disputed) {</span></div>
+        <div class="code-line"><span class="line-num">178</span><span class="line-code">        ...</span></div>
+        <div class="code-line"><span class="line-num">192</span><span class="line-code">    }</span></div>
+        <div class="code-line"><span class="line-num">193</span><span class="line-code"></span></div>
+        <div class="code-line"><span class="line-num">194</span><span class="line-code">    <span class="comment">// Normal resolution - must wait for dispute window</span></span></div>
+        <div class="code-line"><span class="line-num">195</span><span class="line-code">    <span class="keyword">require</span>(block.timestamp > market.resolvedAt + DISPUTE_WINDOW, <span class="string">"Dispute window active"</span>);</span></div>
+        <div class="code-line"><span class="line-num">196</span><span class="line-code">    ...</span></div>
+        <div class="code-line"><span class="line-num">207</span><span class="line-code">}</span></div>
+      </div>
+      <div class="annotation warning">
+        <span class="annotation-icon">⚠️</span>
+        <strong>Edge Case — Division by Zero:</strong> If <code>winningSide == 0</code> (everyone bet wrong), claim reverts. Should handle explicitly.
+      </div>
+      <div class="annotation info">
+        <span class="annotation-icon">ℹ️</span>
+        <strong>Dispute Resolution:</strong> If disputed, pool splits 50/50 between YES and NO stakers proportionally. Simplified — no arbitration.
+      </div>
+
+      <!-- Summary -->
+      <div class="toc-section" style="margin-top: 40px;">
+        <h2>🔍 Audit Summary</h2>
+        <p><strong>Overall Assessment:</strong> ⚠️ <strong>MEDIUM RISK — Production-ready with caveats</strong></p>
+        
+        <h3 style="color: #4caf50; margin-top: 20px;">✅ Strengths</h3>
+        <ul>
+          <li>Reentrancy protection via OpenZeppelin's <code>ReentrancyGuard</code></li>
+          <li>Clear access control (creator-only resolution)</li>
+          <li>Economic incentives (bond mechanism)</li>
+          <li>Time-based safety (dispute window)</li>
+          <li>No native ETH — simpler security model</li>
+        </ul>
+
+        <h3 style="color: #ff9800; margin-top: 20px;">⚠️ Limitations</h3>
+        <ul>
+          <li>Centralized resolution (creator is single point of trust)</li>
+          <li>No oracle integration (subjective outcomes)</li>
+          <li>Simplified dispute mechanism (50/50 split, no arbitration)</li>
+          <li>No disputer reward (no economic incentive for challenges)</li>
+          <li>Edge case: <code>winningSide == 0</code> not handled</li>
+          <li>No withdrawal before resolution (stakes locked)</li>
+        </ul>
+
+        <h3 style="color: #00d4ff; margin-top: 20px;">📌 Recommendations</h3>
+        <ol>
+          <li><strong>Critical:</strong> Handle <code>winningSide == 0</code> edge case in <code>claim()</code></li>
+          <li><strong>High:</strong> Add disputer reward mechanism (incentivize honest challenges)</li>
+          <li><strong>Medium:</strong> Slash creator bond to disputer (stronger deterrent)</li>
+          <li><strong>Medium:</strong> Add market cancellation function (if no stakes)</li>
+          <li><strong>Low:</strong> Emit event in <code>reclaimBond()</code> for transparency</li>
+        </ol>
+
+        <h3 style="color: #00d4ff; margin-top: 20px;">✅ Hackathon Readiness</h3>
+        <p>Contract is <strong>ready for demo</strong>. Demonstrates core concept well. For mainnet production, integrate oracle (Chainlink, UMA) and conduct formal audit.</p>
+      </div>
+
+      <div style="text-align: center; margin: 40px 0; color: #666; font-size: 0.9em;">
+        <p>Audited by <strong>Maverick</strong> (AI Agent) — February 5, 2026</p>
+        <p>Contract: <a href="https://sepolia.basescan.org/address/0x0D151Ee0Ac7c667766406eBef464554f408E8CEc" target="_blank" style="color: #00d4ff;">0x0D151Ee0Ac7c667766406eBef464554f408E8CEc</a></p>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
